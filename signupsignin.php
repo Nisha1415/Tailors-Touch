@@ -1,0 +1,493 @@
+<?php
+    session_start(); // Start the session to access session variables
+
+    // Display the message only if login fails
+    if (isset($_SESSION['message'])) {
+        echo "<h2 style='color:red;'>" . $_SESSION['message'] . "</h2>";
+        unset($_SESSION['message']); // Clear the message after displaying it
+    }
+    ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in & Sign up Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        input {
+            font-family: "Poppins", sans-serif;
+        }
+
+        main {
+            width: 100%;
+            min-height: 100vh;
+            overflow: hidden;
+            background-color: #FAF3F3;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .box {
+            position: relative;
+            width: 100%;
+            max-width: 1020px;
+            height: 640px;
+            background-color: #fff;
+            border-radius: 3.3rem;
+            box-shadow: 0 60px 40px -30px rgba(0, 0, 0, 0.27);
+        }
+
+        .inner-box {
+            position: absolute;
+            width: calc(100% - 4.1rem);
+            height: calc(100% - 4.1rem);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .forms-wrap {
+            position: absolute;
+            height: 100%;
+            width: 45%;
+            top: 0;
+            left: 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            transition: 0.8s ease-in-out;
+        }
+
+        form {
+            max-width: 260px;
+            width: 100%;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+            transition: opacity 0.02s 0.4s;
+        }
+
+        form.sign-up-form {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            width: 27px;
+            margin-right: 0.3rem;
+        }
+
+        .logo h4 {
+            font-size: 1.1rem;
+            margin-top: -9px;
+            letter-spacing: -0.5px;
+            color: #151111;
+        }
+
+        .heading h2 {
+            font-size: 2.1rem;
+            font-weight: 600;
+            color: #151111;
+        }
+
+        .heading h6 {
+            color: #bababa;
+            font-weight: 400;
+            font-size: 0.75rem;
+            display: inline;
+        }
+
+        .toggle {
+            color: #151111;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .toggle:hover {
+            color: #8371fd;
+        }
+
+        .input-wrap {
+            position: relative;
+            height: 37px;
+            margin-bottom: 2rem;
+        }
+
+        .input-field {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: none;
+            border: none;
+            outline: none;
+            border-bottom: 1px solid #bbb;
+            padding: 0;
+            font-size: 0.95rem;
+            color: #151111;
+            transition: 0.4s;
+        }
+
+        label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            color: #bbb;
+            pointer-events: none;
+            transition: 0.4s;
+        }
+
+        .input-field.active {
+            border-bottom-color: #151111;
+        }
+
+        .input-field.active + label {
+            font-size: 0.75rem;
+            top: -2px;
+        }
+
+        .sign-btn {
+            display: inline-block;
+            width: 100%;
+            height: 43px;
+            background-color: #151111;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 0.8rem;
+            font-size: 0.8rem;
+            margin-bottom: 2rem;
+            transition: 0.3s;
+        }
+
+        .sign-btn:hover {
+            background-color: #8371fd;
+        }
+
+        .text {
+            color: #bbb;
+            font-size: 0.7rem;
+        }
+
+        .text a {
+            color: #bbb;
+            transition: 0.3s;
+        }
+
+        .text a:hover {
+            color: #8371fd;
+        }
+
+        main.sign-up-mode form.sign-in-form {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        main.sign-up-mode form.sign-up-form {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        main.sign-up-mode .forms-wrap {
+            left: 55%;
+        }
+
+        main.sign-up-mode .carousel {
+            left: 0%;
+        }
+
+        .carousel {
+            position: absolute;
+            height: 100%;
+            width: 55%;
+            left: 45%;
+            top: 0;
+            background-color: #DDDCD5;
+            border-radius: 2rem;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            padding-bottom: 2rem;
+            overflow: hidden;
+            transition: 0.8s ease-in-out;
+        }
+
+        .images-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+        }
+
+        .image {
+            width: 100%;
+            grid-column: 1/2;
+            grid-row: 1/2;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.5s;
+        }
+
+        .img-1 {
+            transform: translate(0, -50px);
+        }
+
+        .img-2 {
+            transform: scale(0.4, 0.5);
+        }
+
+        .img-3 {
+            transform: scale(0.3) rotate(-20deg);
+        }
+
+        .image.show {
+            opacity: 1;
+            transform: none;
+        }
+
+        .text-slider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .text-wrap {
+            max-height: 2.2rem;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+
+        .text-group {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            transform: translateY(0);
+            transition: 0.5s;
+        }
+
+        .text-group h2 {
+            line-height: 2.2rem;
+            font-weight: 600;
+            font-size: 1.6rem;
+        }
+
+        .bullets {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bullets span {
+            display: block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #bbb;
+            margin: 0 0.3rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .bullets span.active {
+            background: #8371fd;
+        }
+
+        @media (max-width: 850px) {
+            .inner-box {
+                width: calc(100% - 1.5rem);
+                height: calc(100% - 1.5rem);
+            }
+
+            .forms-wrap {
+                width: 100%;
+            }
+
+            .carousel {
+                width: 100%;
+            }
+
+            .bullets {
+                left: 0;
+                height: 250px;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 1rem;
+            }
+
+            .text-slider {
+                margin: 0;
+            }
+        }
+       
+    .message {
+        color: red; /* Adjust color as needed */
+        margin-bottom: 10px; /* Space below the message */
+    }
+
+
+    </style>
+</head>
+<body>
+
+
+    <main>
+        
+        <div class="box">
+            <div class="inner-box">
+                <div class="forms-wrap">
+                    <!-- Sign In Form -->
+                    <form action="login.php" method="POST" class="sign-in-form">
+                        <div class="logo">
+                            <img src="logo.jpg" alt="logo" />
+                            <h4>Sign In</h4>
+                        </div>
+                        <div class="heading">
+                            <h2>Welcome Back!</h2>
+                            <h6>Login to your account</h6>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="email" name="email" class="input-field" required />
+                            <label>Email Address</label>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="password" name="password" class="input-field" required />
+                            <label>Password</label>
+                        </div>
+                        
+                        <button type="submit" class="sign-btn">Sign In</button>
+                        <div class="text">
+                            <h6>Don't have an account? <a href="#" class="toggle">Sign Up</a></h6>
+                        </div>
+                    </form>
+                    
+                    <!-- Sign Up Form -->
+                    <form action="ttregister.php" method="POST" class="sign-up-form">
+                        <div class="logo">
+                            <img src="logo.jpg" alt="logo" />
+                            <h4>Sign Up</h4>
+                        </div>
+                        <div class="heading">
+                            <h2>Create Your Account</h2>
+                            <h6>Fill in the details below</h6>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="text" name="full_name" class="input-field" required />
+                            <label>Full Name</label>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="email" name="email" class="input-field" required />
+                            <label>Email Address</label>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="password" name="password" class="input-field" required />
+                            <label>Password</label>
+                        </div>
+                        <div class="input-wrap">
+                            <input type="text" name="address" class="input-field" required />
+                            <label>Address</label>
+                        </div>
+
+                        <div class="input-wrap">
+                            <input type="text" name="phone" class="input-field" required />
+                            <label>Mobile No:</label>
+                        </div>
+                        
+                        <button type="submit" class="sign-btn">Sign Up</button>
+                        <div class="text">
+                            <h6>Already have an account? <a href="#" class="toggle">Sign In</a></h6>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Carousel and Other Elements -->
+                <div class="carousel">
+                    <div class="images-wrapper">
+                        <img src="logo.jpg" class="image img-1 show" alt="" />
+                    </div>
+                    <div class="text-slider">
+                        <div class="text-wrap">
+                            <div class="text-group">
+                                <h2>Welcome</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bullets">
+                        <span class="active" data-value="1"></span>
+                        <span data-value="2"></span>
+                        <span data-value="3"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const inputs = document.querySelectorAll(".input-field");
+        const toggle_btn = document.querySelectorAll(".toggle");
+        const main = document.querySelector("main");
+        const bullets = document.querySelectorAll(".bullets span");
+        const images = document.querySelectorAll(".image");
+
+        inputs.forEach((inp) => {
+            inp.addEventListener("focus", () => {
+                inp.classList.add("active");
+            });
+            inp.addEventListener("blur", () => {
+                if (inp.value !== "") return;
+                inp.classList.remove("active");
+            });
+        });
+        function showPopup(message) {
+             alert(message);
+        }
+
+        // Toggle between Sign Up and Sign In forms
+        toggle_btn.forEach((btn) => {
+            btn.addEventListener("click", (event) => {
+                event.preventDefault(); // Prevent default anchor behavior
+                main.classList.toggle("sign-up-mode");
+            });
+        });
+
+        function moveSlider() {
+            let index = this.dataset.value;
+            let currentImage = document.querySelector(`.img-${index}`);
+            images.forEach((img) => img.classList.remove("show"));
+            currentImage.classList.add("show");
+
+            const textSlider = document.querySelector(".text-group");
+            textSlider.style.transform = `translateY(${-(index - 1) * 2.2}rem)`;
+
+            bullets.forEach((bull) => bull.classList.remove("active"));
+            this.classList.add("active");
+        }
+
+        bullets.forEach((bullet) => {
+            bullet.addEventListener("click", moveSlider);
+        });
+    </script>
+</body>
+</html>

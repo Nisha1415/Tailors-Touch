@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Try-On</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #f7f3f0, #fff);
+      margin: 0;
+      padding: 40px 20px;
+      color: #333;
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #b44b63;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #ffffff;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      text-align: center;
+    }
+
+    button {
+      background-color: #b44b63;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #a33f56;
+    }
+
+    #imageUpload {
+      display: none;
+    }
+
+    video, canvas {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 640px;
+      height: auto;
+      border-radius: 16px;
+      border: 2px solid #ddd;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    p.instructions {
+      font-size: 0.9em;
+      margin-top: 15px;
+      color: #555;
+    }
+  </style>
+
+  <!-- OpenCV.js -->
+  <script async src="https://docs.opencv.org/3.4.0/opencv.js"></script>
+  <!-- TensorFlow.js and BodyPix -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Virtual Try-On</h2>
+
+  <div class="btn-group">
+    <button id="cameraBtn" disabled>Use Camera</button>
+    <button id="uploadBtn">Upload Image</button>
+  </div>
+  
+  <input type="file" id="imageUpload" accept="image/*" />
+  <video id="video" autoplay style="display:none;"></video>
+  <canvas id="canvas" width="640" height="480"></canvas>
+  <p class="instructions">
+    Use arrow keys to move the dress, <code>+</code>/<code>-</code> to resize.
+  </p>
+</div>
+
+<script>
+  const cameraBtn = document.getElementById('cameraBtn');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const imageUpload = document.getElementById('imageUpload');
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  let mediaStream;
+  let blouseImage = null;
+  let bodypixModel;
+
+  const dressImagePath = 'images/blouse.png'; // Your dress image path
+  let baseImage = null;
+
+  // Overlay position and size
+  let overlayX = 170;
+  let overlayY = 100;
+  let overlayWidth = 300;
+  let overlayHeight = 300;
+
+  async function loadBodyPix() {
+    bodypixModel = await bodyPix.load();
+    console.log("BodyPix model loaded.");
+  }
+
+  function waitForOpenCVReady() {
+    if (cv && cv.Mat) {
+      cameraBtn.disabled = false;
+      console.log('OpenCV.js is ready!');
+      loadDressImage();
+    } else {
+      console.log('Waiting for OpenCV.js to load...');
+      setTimeout(waitForOpenCVReady, 100);
+    }
+  }
+
+  window.onload = () => {
+    loadBodyPix();
+    waitForOpenCVReady();
+  };
+
+  function stopCamera() {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream = null;
+    }
+  }
+
+  function loadDressImage() {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = dressImagePath;
+    img.onload = () => {
+      blouseImage = img;
+      console.log("Dress image loaded.");
+    };
+  }
+
+  async function removeBackground(imageSource) {
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    tempCtx.drawImage(imageSource, 0, 0, canvas.width, canvas.height);
+
+    const tempImage = new Image();
+    tempImage.src = tempCanvas.toDataURL();
+
+    return new Promise((resolve) => {
+      tempImage.onload = async () => {
+        const segmentation = await bodypixModel.segmentPerson(tempImage);
+        const mask = bodyPix.toMask(
+          segmentation,
+          { r: 0, g: 0, b: 0, a: 0 },
+          { r: 255, g: 255, b: 255, a: 255 }
+        );
+        bodyPix.drawMask(canvas, tempImage, mask, 1, 0, false);
+        baseImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        drawOverlay();
+        resolve();
+      };
+    });
+  }
+
+  function drawOverlay() {
+    if (baseImage) {
+      ctx.putImageData(baseImage, 0, 0);
+    }
+    if (blouseImage) {
+      ctx.drawImage(blouseImage, overlayX, overlayY, overlayWidth, overlayHeight);
+    }
+  }
+
+  async function processImageWithOverlay(imageSource) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    await removeBackground(imageSource);
+  }
+
+  // Keyboard control for overlay
+  document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowUp': overlayY -= 5; break;
+      case 'ArrowDown': overlayY += 5; break;
+      case 'ArrowLeft': overlayX -= 5; break;
+      case 'ArrowRight': overlayX += 5; break;
+      case '+':
+      case '=':
+        overlayWidth += 10;
+        overlayHeight += 10;
+        break;
+      case '-':
+        overlayWidth -= 10;
+        overlayHeight -= 10;
+        break;
+    }
+    drawOverlay();
+  });
+
+  cameraBtn.addEventListener('click', () => {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        mediaStream = stream;
+        video.srcObject = stream;
+        video.style.display = 'block';
+        video.play();
+
+        setTimeout(() => {
+          video.pause();
+          video.style.display = 'none';
+          processImageWithOverlay(video);
+          stopCamera();
+        }, 3000);
+      })
+      .catch(err => {
+        alert('Camera error: ' + err.message);
+      });
+  });
+
+  uploadBtn.addEventListener('click', () => {
+    imageUpload.click();
+  });
+
+  imageUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const img = new Image();
+      img.onload = () => {
+        processImageWithOverlay(img);
+      };
+      img.src = URL.createObjectURL(file);
+    }
+  });
+</script>
+
+</body>
+</html>  
