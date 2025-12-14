@@ -2,92 +2,23 @@
 <html lang="en">
 <head>
     <title>Tailor Touch</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet" />
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #FAF3F3;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        h2 {
-            font-family: 'Playfair Display', serif;
-            color: #2e7d32;
-            font-size: 32px;
-            text-align: center;
-        }
-        .hidden {
-            display: none;
-        }
-        select, button {
-            font-size: 18px;
-            margin-top: 10px;
-            padding: 12px;
-            border: 2px solid #2e7d32;
-            border-radius: 8px;
-            width: 250px;
-        }
-        .submit-button {
-            background-color: #2e7d32;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 20%;
-            font-size: 18px;
-        }
-        .submit-button:hover {
-            background-color: #4CAF50;
-        }
-        .container {
-            padding: 20px;
-            text-align: center;
-        }
-        header {
-            background-color: #333;
-            padding: 15px 0;
-            text-align: center;
-        }
-        nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        nav ul li {
-            display: inline;
-            margin: 0 20px;
-        }
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            font-family: 'Roboto', sans-serif;
-            font-size: 18px;
-            padding: 10px;
-        }
-        nav ul li a:hover {
-            color: #D40000;
-        }
-        .para {
-            background-color: #FFFFFF;
-            padding: 30px;
-            text-align: center;
-            font-family: 'Playfair Display', serif;
-            color: darkred;
-            font-style: italic;
-            font-size: 20px;
-            line-height: 1.8;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            margin: 20px auto;
-        }
+        body { font-family: 'Roboto', sans-serif; background-color: #FAF3F3; color: #333; margin: 0; padding: 0; box-sizing: border-box; }
+        h2 { font-family: 'Playfair Display', serif; color: #2e7d32; font-size: 32px; text-align: center; }
+        .hidden { display: none; }
+        select, button { font-size: 18px; margin-top: 10px; padding: 12px; border: 2px solid #2e7d32; border-radius: 8px; width: 250px; }
+        .submit-button { background-color: #2e7d32; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 20%; font-size: 18px; }
+        .submit-button:hover { background-color: #4CAF50; }
+        .container { padding: 20px; text-align: center; }
+        header { background-color: #333; padding: 15px 0; text-align: center; }
+        nav ul { list-style: none; margin: 0; padding: 0; text-align: center; }
+        nav ul li { display: inline; margin: 0 20px; }
+        nav ul li a { color: white; text-decoration: none; font-weight: bold; font-family: 'Roboto', sans-serif; font-size: 18px; padding: 10px; }
+        nav ul li a:hover { color: #D40000; }
+        .para { background-color: #FFFFFF; padding: 30px; text-align: center; font-family: 'Playfair Display', serif; color: darkred; font-style: italic; font-size: 20px; line-height: 1.8; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 80%; margin: 20px auto; }
     </style>
 </head>
 <body>
@@ -148,7 +79,7 @@
 
     <script>
         const trends = {
-            "ladies": ["Blouse", "Kurtha", "Gown","Skirt","Frock"],
+            "ladies": ["Blouse", "Kurtha", "Gown", "Skirt", "Frock"],
             "kids": ["Gown", "Frock", "Skirt"]
         };
 
@@ -163,6 +94,7 @@
         const colors = {
             "Blouse": ["Red", "Blue", "Cream", "Maroon"],
             "Kurtha": ["Pink", "Green", "Yellow", "Blue"],
+            "Gown": ["Red", "Blue", "Black", "White"],
             "Frock": ["White", "Peach", "Blue", "Purple"],
             "Skirt": ["Red", "Pink", "Black", "Blue"]
         };
@@ -185,45 +117,48 @@
         }
 
         function showMaterials(trend) {
+            if (!trend) {
+                document.getElementById("materialsContainer").classList.add("hidden");
+                document.getElementById("colorsContainer").classList.add("hidden");
+                document.getElementById("measurementOptionContainer").classList.add("hidden");
+                document.getElementById("submitBtn").classList.add("hidden");
+                return;
+            }
             const materialSelect = document.getElementById("materialSelect");
             materialSelect.innerHTML = '<option value="">Select a material</option>';
-            materials[trend]?.forEach(material => {
+            materials[trend].forEach(material => {
                 const option = document.createElement("option");
                 option.value = material;
                 option.textContent = material;
                 materialSelect.appendChild(option);
             });
-
             document.getElementById("materialsContainer").classList.remove("hidden");
             document.getElementById("colorsContainer").classList.add("hidden");
             document.getElementById("measurementOptionContainer").classList.add("hidden");
             document.getElementById("submitBtn").classList.add("hidden");
-
-            // Store trend for color logic
-            materialSelect.setAttribute("data-trend", trend);
         }
 
         function showColorOptions() {
-            const trend = document.getElementById("materialSelect").getAttribute("data-trend");
-
-            if (colors[trend]) {
-                const colorSelect = document.getElementById("colorSelect");
-                colorSelect.innerHTML = '<option value="">Select a color</option>';
-                colors[trend].forEach(color => {
-                    const option = document.createElement("option");
-                    option.value = color;
-                    option.textContent = color;
-                    colorSelect.appendChild(option);
-                });
-
-                document.getElementById("colorsContainer").classList.remove("hidden");
+            const trend = document.getElementById("trendSelect").value;
+            if (!trend) {
+                document.getElementById("colorsContainer").classList.add("hidden");
                 document.getElementById("measurementOptionContainer").classList.add("hidden");
                 document.getElementById("submitBtn").classList.add("hidden");
-            } else {
-                document.getElementById("colorsContainer").classList.add("hidden");
-                document.getElementById("measurementOptionContainer").classList.remove("hidden");
-                document.getElementById("submitBtn").classList.add("hidden");
+                return;
             }
+
+            const colorSelect = document.getElementById("colorSelect");
+            colorSelect.innerHTML = '<option value="">Select a color</option>';
+            colors[trend].forEach(color => {
+                const option = document.createElement("option");
+                option.value = color;
+                option.textContent = color;
+                colorSelect.appendChild(option);
+            });
+
+            document.getElementById("colorsContainer").classList.remove("hidden");
+            document.getElementById("measurementOptionContainer").classList.add("hidden");
+            document.getElementById("submitBtn").classList.add("hidden");
         }
 
         function showMeasurementOptions() {

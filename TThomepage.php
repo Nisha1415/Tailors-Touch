@@ -193,7 +193,7 @@ session_start(); // Start the session
             <li><a href="TThomepage.php">Home</a></li>
             <li><a href="signupsignin.php">Login</a></li>
             <li><a href="logout.php">Logout</a></li>
-            <
+            <li><a href="feedback.html">Reviews</a></li>
         </ul>
     </nav>
 </header>

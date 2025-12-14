@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tailors Touch - Product Feedback</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f6fff8;
+    margin: 0;
+    padding: 30px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    width: 680px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  h1 {
+    color: #1b5e20;
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .sub {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+  }
+
+  #summaryBox {
+    background: #e8f5e9;
+    border-left: 6px solid #2e7d32;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .review-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .review-title {
+    font-weight: 600;
+    color: #2e7d32;
+    font-size: 17px;
+  }
+
+  .review-text {
+    margin-top: 8px;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .emoji {
+    font-size: 18px;
+  }
+
+  .feedback-form {
+    margin-top: 40px;
+    border-top: 2px solid #e0e0e0;
+    padding-top: 25px;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+  }
+
+  button {
+    background: #2e7d32;
+    color: white;
+    font-size: 17px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #43a047;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Customer Feedback</h1>
+  <div class="sub">See what others say about Tailors Touch 🌿</div>
+
+  <!-- Summary Section -->
+  <div id="summaryBox" style="display:none;">
+    <h3>Overall Summary 🌿</h3>
+    <p id="summaryText"></p>
+  </div>
+
+  <!-- Reviews -->
+  <div id="reviewsContainer"></div>
+
+  <!-- Feedback Form -->
+  <div class="feedback-form">
+    <h2 style="color:#1b5e20;">Share Your Experience 💬</h2>
+    <textarea id="reviewText" placeholder="Write your feedback here..."></textarea>
+    <button id="submitBtn">Submit Feedback</button>
+  </div>
+</div>
+
+<script>
+let reviews = [];
+
+// Sentiment Analysis
+function analyzeSentiment(text) {
+  const t = text.toLowerCase();
+  if (t.includes("bad") || t.includes("poor") || t.includes("worst") || t.includes("hate") || t.includes("slow"))
+    return "negative";
+  if (t.includes("okay") || t.includes("average"))
+    return "neutral";
+  return "positive";
+}
+
+function getTitle(sentiment) {
+  if (sentiment === "positive") return "Delightful";
+  if (sentiment === "neutral") return "Neutral";
+  return "Disappointed";
+}
+
+function getEmoji(sentiment) {
+  if (sentiment === "positive") return "😊";
+  if (sentiment === "neutral") return "😐";
+  return "😞";
+}
+
+// Load summary + latest reviews
+function loadSummary() {
+  fetch("summarize_feedback.php")
+    .then(res => res.json())
+    .then(data => {
+
+      // Summary
+      document.getElementById("summaryText").textContent = data.summary;
+      document.getElementById("summaryBox").style.display = "block";
+
+      // Reviews
+      reviews = data.recent_feedbacks;
+      displayReviews();
+    });
+}
+
+function displayReviews() {
+  const container = document.getElementById("reviewsContainer");
+  container.innerHTML = "";
+
+  reviews.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "review-card";
+
+    div.innerHTML = `
+      <div class="review-title">${getTitle(r.sentiment)}</div>
+      <div class="review-text">${r.review_text} <span class="emoji">${getEmoji(r.sentiment)}</span></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Submit Feedback
+document.getElementById("submitBtn").addEventListener("click", () => {
+  const text = document.getElementById("reviewText").value.trim();
+  if (!text) return alert("Please enter your feedback!");
+
+  const sentiment = analyzeSentiment(text);
+
+  fetch("save_feedback.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `review=${encodeURIComponent(text)}&sentiment=${sentiment}`
+  })
+  .then(res => res.text())
+  .then(msg => {
+    alert(msg);
+    document.getElementById("reviewText").value = "";
+    loadSummary();
+  });
+});
+
+window.onload = loadSummary;
+</script>
+
+</body>
+</html>
