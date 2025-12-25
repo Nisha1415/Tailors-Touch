@@ -24,8 +24,7 @@ This application digitizes tailoring services and offers a smooth workflow like 
 ✔ Trend & Material Selection (Dynamic UI)  
 ✔ Measurement Form Auto-Changes Based on Dress Type  
 ✔ **Virtual Try-On System** using BodyPix + OpenCV.js  
-✔ Background removal & body alignment for dress overlay  
-✔ Auto GPS Location Capture & Save to Database  
+✔ Background removal & body alignment for dress overlay   
 ✔ Home Visit / Pickup Scheduling  
 ✔ Order Status Tracking  
 ✔ **Feedback Summarization** using NLP (Python / TextRank)  
