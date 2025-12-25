@@ -1,6 +1,6 @@
 # 🧵 Tailors Touch – Online Tailoring & Virtual Try-On System
 
-Tailors Touch is a web-based tailoring platform where users can select dress types, upload measurements, and visualize how the outfit looks on their body before stitching. The system includes **Virtual Try-On**, **GPS-based location saving**, **Order management**, and **Feedback Summarization using NLP**.
+Tailors Touch is a web-based tailoring platform where users can select dress types, upload measurements, and visualize how the outfit looks on their body before stitching. The system includes **Virtual Try-On**, **Order management**, and **Feedback Summarization using NLP**.
 
 ---
 
